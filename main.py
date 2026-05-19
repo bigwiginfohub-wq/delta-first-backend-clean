@@ -18,16 +18,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # -------------------------
 # HEALTH CHECK
 # -------------------------
-app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-    time: new Date().toISOString()
-  });
-});
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    }
 # -------------------------
 # VALIDATION MODEL
 # -------------------------
