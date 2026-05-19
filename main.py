@@ -22,11 +22,12 @@ app.add_middleware(
 # -------------------------
 # HEALTH CHECK
 # -------------------------
-@app.get("/")
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    time: new Date().toISOString()
+  });
+});
 # -------------------------
 # VALIDATION MODEL
 # -------------------------
