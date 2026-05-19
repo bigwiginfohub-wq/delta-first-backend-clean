@@ -65,10 +65,29 @@ def compute_valid(data: dict) -> bool:
 # VALIDATE ENDPOINT
 # -------------------------
 @app.post("/validate")
-async def validate(request: Request):
+def validate(payload: AuditPayload):
     try:
-        payload = await request.json()
+        data = payload.model_dump()
 
+        valid = compute_valid(data)
+
+        return {
+            "valid": valid,
+            "audit_id": data["audit_id"],
+            "primary_driver": data["primary_driver"],
+            "mcl_coefficient": data["mcl_coefficient"],
+            "friction_score": data["friction_score"],
+            "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "SERVER_ERROR",
+                "message": str(e)
+            }
+        )
         # Validate structure
         data = AuditPayload(**payload).model_dump()
 
