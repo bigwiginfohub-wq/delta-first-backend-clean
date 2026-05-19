@@ -52,13 +52,37 @@ class AuditPayload(BaseModel):
 # CORE LOGIC
 # -------------------------
 def compute_valid(data: dict) -> bool:
-    return (
-        data["integrity_score"] >= 70.0 and
-        data["friction_score"] <= 0.70 and
-        data["mcl_coefficient"] >= 0.50 and
-        data["primary_driver"] in ["H1", "H2", "H3"] and
-        data["boundary"] is not None and data["boundary"].strip() != ""
+    # -----------------------------
+    # 1. Evidence strength weighting
+    # -----------------------------
+    base_score = data["integrity_score"] / 100.0
+
+    friction = data["friction_score"]
+
+    mcl = data["mcl_coefficient"]
+
+    driver_weight = {
+        "H1": 1.0,
+        "H2": 0.9,
+        "H3": 0.8
+    }.get(data["primary_driver"], 0.5)
+
+    boundary_strength = 1.0 if data["boundary"].strip() else 0.0
+
+    # -----------------------------
+    # 2. Enhanced truth score model
+    # -----------------------------
+    truth_score = (
+        base_score * 0.35 +
+        mcl * 0.35 +
+        (1 - friction) * 0.20 +
+        driver_weight * 0.10
     )
+
+    # -----------------------------
+    # 3. Decision threshold
+    # -----------------------------
+    return truth_score >= 0.62 and boundary_strength > 0
 
 
 # -------------------------
