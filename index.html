@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vintas.org — The Bridge Architect</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #ffffff; --bg2: #f7f7f5; --bg3: #f0efeb;
+      --text: #1a1a18; --text2: #6b6a65; --text3: #9e9d97;
+      --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.18);
+      --blue: #185FA5; --blue-light: #E6F1FB;
+      --green: #1D9E75; --green-light: #E1F5EE;
+      --red: #E24B4A; --red-light: #FCEBEB;
+      --amber-light: #FAEEDA; --amber-text: #633806;
+      --radius: 8px; --radius-lg: 12px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg3); min-height: 100vh; color: var(--text);
+    }
+
+    /* LANDING */
+    #landing {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem 1rem; text-align: center;
+    }
+    .land-org { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.6rem; }
+    .land-title { font-size: 36px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+    .land-by { font-size: 13px; color: var(--text3); margin-bottom: 1.8rem; }
+    .land-line { width: 40px; height: 1px; background: var(--border2); margin: 0 auto 1.8rem; }
+    .land-tagline { font-size: 18px; color: var(--text2); max-width: 480px; line-height: 1.65; margin-bottom: 0.8rem; }
+    .land-sub { font-size: 13px; color: var(--text3); max-width: 400px; line-height: 1.6; margin-bottom: 2.4rem; }
+    .land-btn {
+      padding: 11px 28px; border-radius: var(--radius);
+      background: var(--text); color: #fff;
+      border: none; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .land-btn:hover { opacity: 0.85; }
+    .land-how { margin-top: 3rem; display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; max-width: 600px; }
+    .land-step { text-align: left; max-width: 160px; }
+    .land-step-n { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+    .land-step-t { font-size: 13px; color: var(--text); font-weight: 500; margin-bottom: 3px; }
+    .land-step-d { font-size: 12px; color: var(--text3); line-height: 1.5; }
+    .land-footer { margin-top: 3rem; font-size: 11px; color: var(--text3); }
+    .land-footer a { color: var(--text3); text-decoration: none; }
+
+    /* DASHBOARD */
+    #dashboard {
+      display: none; min-height: 100vh;
+      align-items: flex-start; justify-content: center;
+      padding: 2rem 1rem;
+    }
+    #dashboard.visible { display: flex; }
+    .app {
+      display: flex; width: 100%; max-width: 940px;
+      min-height: 660px; border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      background: var(--bg); box-shadow: 0 2px 24px rgba(0,0,0,0.06);
+    }
+    .sidebar {
+      width: 224px; background: var(--bg2);
+      border-right: 0.5px solid var(--border);
+      padding: 1.5rem 0; flex-shrink: 0;
+      display: flex; flex-direction: column;
+    }
+    .logo { padding: 0 1.25rem 1.1rem; border-bottom: 0.5px solid var(--border); margin-bottom: 0.75rem; }
+    .logo-org { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 3px; }
+    .logo-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .logo-version { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .step-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 1.25rem; cursor: pointer;
+      font-size: 13px; color: var(--text2);
+      border-left: 2px solid transparent; transition: all 0.12s;
+    }
+    .step-item:hover { background: var(--bg); color: var(--text); }
+    .step-item.active { background: var(--bg); color: var(--text); border-left-color: var(--blue); font-weight: 500; }
+    .step-item.done .snum { background: var(--green); color: #fff; border-color: var(--green); }
+    .step-item.active .snum { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .snum {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      background: var(--bg3); border: 0.5px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 500; color: var(--text2); margin-top: 1px;
+    }
+    .step-labels { flex: 1; }
+    .step-name { font-size: 13px; line-height: 1.3; }
+    .step-hint { font-size: 11px; color: var(--text3); margin-top: 2px; line-height: 1.3; }
+    .api-status { margin-top: auto; padding: 0.75rem 1.25rem; border-top: 0.5px solid var(--border); }
+    .api-pill { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); }
+    .api-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+    .api-dot.live { background: var(--green); animation: pulse 2s infinite; }
+    .api-dot.error { background: var(--red); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar {
+      padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-title { font-size: 15px; font-weight: 500; color: var(--text); }
+    .topbar-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+    .topbar-back { font-size: 12px; color: var(--text3); cursor: pointer; padding: 4px 8px; border-radius: var(--radius); border: 0.5px solid var(--border); background: none; }
+    .topbar-back:hover { background: var(--bg2); }
+    .prog-bar { height: 3px; background: var(--bg2); }
+    .prog-fill { height: 100%; background: var(--blue); transition: width 0.35s; }
+    .content { padding: 1.25rem 1.5rem; flex: 1; overflow-y: auto; }
+    .flabel { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 4px; }
+    .fhint { font-size: 12px; color: var(--text3); margin-bottom: 9px; line-height: 1.55; }
+    .fplain { font-size: 12px; color: var(--blue); background: var(--blue-light); border-radius: var(--radius); padding: 7px 10px; margin-bottom: 10px; line-height: 1.5; }
+    textarea, select, input[type="text"] {
+      width: 100%; border: 0.5px solid var(--border2);
+      border-radius: var(--radius); padding: 9px 12px;
+      font-size: 13px; font-family: inherit; color: var(--text);
+      background: var(--bg); transition: border-color 0.15s;
+    }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+    textarea:focus, select:focus, input:focus { outline: none; border-color: var(--blue); }
+    .divider { margin: 1.1rem 0; border: none; border-top: 0.5px solid var(--border); }
+    .ev-row { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+    .ev-row textarea { min-height: 56px; }
+    .ev-row select { width: 120px; flex-shrink: 0; }
+    .add-btn {
+      font-size: 12px; color: var(--blue); background: none;
+      border: 0.5px dashed var(--blue); border-radius: var(--radius);
+      padding: 6px 12px; cursor: pointer; margin-top: 2px;
+    }
+    .add-btn:hover { background: var(--blue-light); }
+    .ai-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 0.85rem; margin-top: 1rem; }
+    .ai-hdr { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+    .ai-dot-sm { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    .ai-content { font-size: 13px; color: var(--text2); line-height: 1.6; }
+    .ai-ask { font-size: 12px; color: var(--blue); background: none; border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 5px 11px; cursor: pointer; margin-top: 7px; }
+    .ai-ask:hover { background: var(--blue-light); }
+    .ai-ask:disabled { opacity: 0.5; cursor: not-allowed; }
+    .footer { padding: 0.9rem 1.5rem; border-top: 0.5px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .nbtn { padding: 7px 16px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border2); background: var(--bg); color: var(--text); transition: background 0.15s; }
+    .nbtn:hover { background: var(--bg2); }
+    .nbtn.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .nbtn.primary:hover { background: #1050a0; }
+    .nbtn.danger { background: var(--red); color: #fff; border-color: var(--red); }
+    .nbtn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: var(--radius); font-size: 11px; font-weight: 500; }
+    .b-strong { background: #EAF3DE; color: #27500A; }
+    .b-medium { background: var(--amber-light); color: var(--amber-text); }
+    .b-weak { background: var(--red-light); color: #791F1F; }
+    .result-card { border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 0.85rem; background: var(--bg); }
+    .result-card h3 { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); }
+    .result-card .plain-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+    .result-val { font-size: 13px; color: var(--text); line-height: 1.6; }
+    .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+    .metric { background: var(--bg2); border-radius: var(--radius); padding: 0.75rem; text-align: center; }
+    .metric-val { font-size: 22px; font-weight: 500; color: var(--text); }
+    .metric-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .metric-plain { font-size: 10px; color: var(--text3); margin-top: 3px; line-height: 1.3; }
+    .valid-banner { border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .valid-banner.pass { background: #EAF3DE; color: #27500A; }
+    .valid-banner.fail { background: var(--red-light); color: #791F1F; }
+    .causal-map { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .cnode { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 7px 10px; font-size: 11px; text-align: center; flex: 1; min-width: 70px; }
+    .cnode.driver { border-color: var(--blue); background: var(--blue-light); color: #0C447C; }
+    .cnode.peak { border-color: var(--green); background: var(--green-light); color: #085041; }
+    .cnode-label { font-size: 10px; opacity: 0.7; margin-bottom: 3px; }
+    .carr { color: var(--text3); font-size: 14px; }
+    .loading-spin { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border2); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .err-box { background: var(--red-light); border: 0.5px solid #F09595; border-radius: var(--radius); padding: 0.75rem; font-size: 13px; color: #791F1F; margin-top: 0.75rem; }
+    .meta-text { font-size: 11px; color: var(--text3); margin-top: 4px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 1rem; flex-wrap: wrap; }
+    .about-strip { background: var(--bg2); border-top: 0.5px solid var(--border); padding: 0.6rem 1.5rem; font-size: 11px; color: var(--text3); display: flex; align-items: center; justify-content: space-between; }
+    .about-strip a { color: var(--text3); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- LANDING PAGE -->
+<div id="landing">
+  <div class="land-org">Vintas.org</div>
+  <div class="land-title">The Bridge Architect</div>
+  <div class="land-by">Founded by human. Powered by AI.</div>
+  <div class="land-line"></div>
+  <div class="land-tagline">Paste anything — an article, a claim, a report — and see what the evidence actually supports.</div>
+  <div class="land-sub">A free, open tool that helps you think more clearly about any claim. No account needed. No data stored. The method is the product.</div>
+  <button class="land-btn" onclick="startDashboard()">Start your analysis →</button>
+  <div class="land-how">
+    <div class="land-step">
+      <div class="land-step-n">Step 1</div>
+      <div class="land-step-t">State the claim</div>
+      <div class="land-step-d">Write exactly what you are trying to verify.</div>
+    </div>
+    <div class="land-step">
+      <div class="land-step-n">Step 2–5</div>
+      <div class="land-step-t">Examine the evidence</div>
+      <div class="land-step-d">Rate your sources, declare your perspective, test what would prove you wrong.</div>
+    </div>
+    <div class="land-step">
+      <div class="land-step-n">Step 6–7</div>
+      <div class="land-step-t">Get a clear verdict</div>
+      <div class="land-step-d">See a full report with an evidence score and what the data cannot tell you.</div>
+    </div>
+  </div>
+  <div class="land-footer">Open source · No login · <a href="https://github.com/bigwiginfohub-wq/fidelity-framework" target="_blank">View the method on GitHub</a></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-org">Vintas.org</div>
+      <div class="logo-title">Bridge Architect Lens</div>
+      <div class="logo-version">Fidelity Framework · Open</div>
+    </div>
+    <div id="snav"></div>
+    <div class="api-status">
+      <div class="api-pill">
+        <div class="api-dot" id="api-dot"></div>
+        <span id="api-label">Checking...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="stitle">Step 1 — state your claim</div>
+        <div class="topbar-sub" id="ssub">Write exactly what you want to verify</div>
+      </div>
+      <button class="topbar-back" onclick="goHome()">← Back to home</button>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:14%"></div></div>
+    <div class="content" id="scontent"></div>
+    <div class="footer">
+      <button class="nbtn" id="bbtn" onclick="goBack()">Back</button>
+      <span style="font-size:11px;color:var(--text3)" id="sctr">Step 1 of 7</span>
+      <button class="nbtn primary" id="nbtn" onclick="goNext()">Next</button>
+    </div>
+  </div>
+</div>
+<div class="about-strip">
+  <span>The Bridge Architect Method · Founded by human, powered by AI · Public stewardship, not ownership</span>
+  <a href="https://github.com/bigwiginfohub-wq/fidelity-framework" target="_blank">Open source</a>
+</div>
+</div>
+
+<script>
+  const API_URL = "https://delta-first-backend-clean-production.up.railway.app";
+  
+  function startDashboard() {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('dashboard').classList.add('visible');
+    checkAPI();
+    render();
+  }
+
+  function goHome() {
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('landing').style.display = 'flex';
+    Object.assign(S, { cur:1, claim:'', context:'', evidence:[{text:'',strength:'strong'}], perspective:'', perspectiveDetail:'', falsify:'', mainDriver:'', peakMoment:'', secondary:'', limits:'', apiResult:null, apiError:null, submitting:false });
+  }
+
+  const steps = [
+    { label:"State your claim",         sub:"Write exactly what you want to verify",               plain:"What are you trying to check? Write it as a simple cause-and-effect statement." },
+    { label:"List your evidence",       sub:"Rate the strength of each source you have",            plain:"What are you basing this on? Rate each piece: strong (verified data), medium (credible source), or weak (rumor or assumption)." },
+    { label:"Declare your perspective", sub:"What angle are you coming from?",                      plain:"Everyone has a lens. Naming yours prevents hidden bias from shaping your conclusion." },
+    { label:"What would prove you wrong?", sub:"Design the test that could change your mind",      plain:"Good analysis names its own limit. What evidence would make you conclude the opposite?" },
+    { label:"Map the causal story",     sub:"Identify the main driver and key moment",              plain:"What caused this? Walk through the chain: what drove it, when it turned, and what else played a role." },
+    { label:"State your limits",        sub:"What can you not know from here?",                    plain:"Every analysis has gaps. Naming them is a sign of strength, not weakness." },
+    { label:"See your results",         sub:"Your full evidence report",                            plain:"Here is what your evidence actually supports — and what it cannot tell you." }
+  ];
+
+  const S = { cur:1, claim:'', context:'', evidence:[{text:'',strength:'strong'}], perspective:'', perspectiveDetail:'', falsify:'', mainDriver:'', peakMoment:'', secondary:'', limits:'', apiResult:null, apiError:null, submitting:false };
+
+  async function checkAPI() {
+  try {
+    const res = await fetch(API_URL + "/health");
+    if (!res.ok) throw new Error();
+
+    const data = await res.json();
+
+    document.getElementById("api-dot").className = "api-dot live";
+    document.getElementById("api-label").textContent = "Live";
+  } catch (e) {
+    document.getElementById("api-dot").className = "api-dot error";
+    document.getElementById("api-label").textContent = "Offline";
+  }
+}
+
+  function renderNav() {
+    document.getElementById("snav").innerHTML = steps.map((s,i) => {
+      const n=i+1, done=S.cur>n, active=S.cur===n;
+      return `<div class="step-item ${active?'active':''} ${done?'done':''}" onclick="jump(${n})">
+        <div class="snum">${done?'✓':n}</div>
+        <div class="step-labels">
+          <div class="step-name">${s.label}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function jump(n){S.cur=n;render();}
+  function goBack(){if(S.cur>1){S.cur--;render();}}
+  function goNext(){if(S.cur<7){S.cur++;render();}}
+
+  async function askAI(prompt, boxId, btnId) {
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+
+  if (!box || !btn) return;
+
+  btn.disabled = true;
+
+  box.innerHTML =
+    "AI guidance is temporarily disabled in this public build.";
+
+  setTimeout(() => {
+    btn.disabled = false;
+  }, 500);
+}
+
+  async function submitToAPI(){
+    S.submitting=true; S.apiResult=null; S.apiError=null; renderStep7();
+    const strong=S.evidence.filter(e=>e.strength==='strong').length;
+    const medium=S.evidence.filter(e=>e.strength==='medium').length;
+    const weak=S.evidence.filter(e=>e.strength==='weak').length;
+    const total=S.evidence.length||1;
+    const mcl=parseFloat(((strong*1.0+medium*0.5+weak*0.1)/total).toFixed(2));
+    const friction=parseFloat(Math.min(1,Math.max(0,0.5+(weak*0.1-strong*0.05))).toFixed(2));
+    const payload={auditor_id:'vintas-public',audit_id:'audit_'+Date.now(),integrity_score:84.0,protocol_mode:'Full Protocol Mode',primary_driver:S.falsify?'H3':'H1',reasoning_trace:S.claim||'No claim provided.',peak_moment:S.peakMoment||'Not specified.',interpretive_anchor:S.perspectiveDetail||S.perspective||'General.',h3_warrant:S.falsify||'Not specified.',null_test:'No.',label_impact:'Harder',friction_score_components:{base:0.50,lens_divergence:0.14,warrant_ambiguity:0.08,validation_confidence:0.05},friction_score:friction,mcl_coefficient:mcl,boundary:S.limits||'No boundary stated.'};
+    try {
+      const res=await fetch(API_URL + "/validate",{{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      S.apiResult=await res.json();
+    } catch(e){ S.apiError='Could not reach the validation server. Please check your connection and try again.'; }
+    S.submitting=false; renderStep7();
+  }
+
+  function plainScore(score){
+    if(score>=0.75) return 'Strong evidence base';
+    if(score>=0.5)  return 'Moderate evidence — some gaps';
+    if(score>=0.25) return 'Weak evidence — treat with caution';
+    return 'Very limited evidence';
+  }
+
+  function renderStep7(){
+    const c=document.getElementById('scontent');
+    if(S.submitting){
+      c.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:240px;gap:14px"><div class="loading-spin" style="width:28px;height:28px;border-width:3px"></div><div style="font-size:14px;color:var(--text2)">Building your report...</div></div>`;
+      return;
+    }
+    if(S.apiError){
+      c.innerHTML=`<div class="err-box">${S.apiError}</div><button class="nbtn primary" style="margin-top:12px" onclick="submitToAPI()">Try again ↗</button>`;
+      return;
+    }
+    if(S.apiResult){
+      const r=S.apiResult, pass=r.valid;
+      const mcl=r.mcl_coefficient||0, fr=r.friction_score||0;
+      c.innerHTML=`
+        <div class="valid-banner ${pass?'pass':'fail'}">${pass?'✓ Your analysis meets the Fidelity Framework standard':'✗ Your analysis needs more evidence — see details below'}</div>
+        <div class="metric-grid">
+          <div class="metric"><div class="metric-val">${mcl.toFixed(2)}</div><div class="metric-lbl">Evidence score</div><div class="metric-plain">${plainScore(mcl)}</div></div>
+          <div class="metric"><div class="metric-val">${fr.toFixed(2)}</div><div class="metric-lbl">Friction score</div><div class="metric-plain">How contested the evidence is</div></div>
+          <div class="metric"><div class="metric-val">${r.primary_driver||'—'}</div><div class="metric-lbl">Primary driver</div><div class="metric-plain">Main causal category</div></div>
+        </div>
+        <div class="result-card"><h3>Your claim</h3><div class="result-val">${S.claim||'—'}</div></div>
+        <div class="result-card"><h3>Causal map</h3><div class="causal-map"><div class="cnode driver"><div class="cnode-label">main driver</div>${S.mainDriver||'—'}</div><div class="carr">→</div><div class="cnode peak"><div class="cnode-label">turning point</div>${S.peakMoment||'—'}</div><div class="carr">→</div><div class="cnode"><div class="cnode-label">secondary</div>${S.secondary||'—'}</div></div></div>
+        <div class="result-card"><h3>What would prove this wrong</h3><div class="result-val">${S.falsify||'—'}</div></div>
+        <div class="result-card"><h3>Known limits of this analysis</h3><div class="result-val">${S.limits||'—'}</div></div>
+        <div class="meta-text">Analysis ID: ${r.audit_id} · Completed: ${r.validated_at?.split('T')[0]||new Date().toISOString().split('T')[0]}</div>
+        <div class="btn-row">
+          <button class="nbtn" onclick="S.cur=1;S.apiResult=null;S.apiError=null;render()">Start new analysis</button>
+          <button class="nbtn primary" onclick="window.print()">Save as PDF</button>
+        </div>`;
+      return;
+    }
+    const strong=S.evidence.filter(e=>e.strength==='strong').length;
+    const medium=S.evidence.filter(e=>e.strength==='medium').length;
+    const weak=S.evidence.filter(e=>e.strength==='weak').length;
+    c.innerHTML=`
+      <div class="fplain">${steps[6].plain}</div>
+      <div class="result-card"><h3>Your claim</h3><div class="result-val">${S.claim||'<em>No claim entered yet.</em>'}</div></div>
+      <div class="result-card"><h3>Evidence summary</h3><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><span class="badge b-strong">${strong} strong</span><span class="badge b-medium">${medium} medium</span><span class="badge b-weak">${weak} weak</span></div><div style="font-size:12px;color:var(--text3)">Perspective: ${S.perspective||'not declared'} · Main driver: ${S.mainDriver||'not set'}</div></div>
+      <div class="ai-box">
+        <div class="ai-hdr"><div class="ai-dot-sm"></div>Ready to generate your report</div>
+        <div class="ai-content" style="font-size:12px">This will validate your analysis against the Fidelity Framework and return your evidence score, friction score, and full causal map.</div>
+        <button class="nbtn danger" style="margin-top:10px" onclick="submitToAPI()">Generate report ↗</button>
+      </div>`;
+  }
+
+  const renderers=[
+    ()=>`
+      <div class="fplain">${steps[0].plain}</div>
+      <div class="flabel">The claim you are testing</div>
+      <div class="fhint">Example: "This policy reduced crime rates" or "The data shows AI is replacing jobs faster than new ones are created."</div>
+      <textarea placeholder="Write your claim here..." onchange="S.claim=this.value">${S.claim}</textarea>
+      <hr class="divider">
+      <div class="flabel">Background (optional)</div>
+      <div class="fhint">Any context that helps understand why this claim matters.</div>
+      <textarea placeholder="Add background context..." onchange="S.context=this.value">${S.context}</textarea>
+      <div class="ai-box">
+        <div class="ai-hdr"><div class="ai-dot-sm"></div>Need help phrasing your claim?</div>
+        <div class="ai-content" id="aib1">Click below and the AI guide will help you make your claim more precise and testable.</div>
+        <button class="ai-ask" id="aibtn1" onclick="askAI('Help me write a clear, specific, testable cause-and-effect claim. The user wrote: &quot;'+S.claim+'&quot;. Suggest a sharper version in plain language.','aib1','aibtn1')">Get guidance ↗</button>
+      </div>`,
+    ()=>{
+      const rows=S.evidence.map((ev,i)=>`
+        <div class="ev-row">
+          <textarea placeholder="Describe this piece of evidence or source..." onchange="S.evidence[${i}].text=this.value">${ev.text}</textarea>
+          <select onchange="S.evidence[${i}].strength=this.value">
+            <option value="strong" ${ev.strength==='strong'?'selected':''}>Strong</option>
+            <option value="medium" ${ev.strength==='medium'?'selected':''}>Medium</option>
+            <option value="weak"   ${ev.strength==='weak'  ?'selected':''}>Weak</option>
+          </select>
+        </div>`).join('');
+      return `
+        <div class="fplain">${steps[1].plain}</div>
+        <div class="flabel">Your evidence</div>
+        <div class="fhint">Strong = official data or verified source · Medium = reputable report or news · Weak = rumor, assumption, or single anecdote</div>
+        ${rows}
+        <button class="add-btn" onclick="S.evidence.push({text:'',strength:'strong'});render()">+ Add another source</button>
+        <div class="ai-box">
+          <div class="ai-hdr"><div class="ai-dot-sm"></div>Not sure how strong your evidence is?</div>
+          <div class="ai-content" id="aib2">Click for plain-language guidance on evaluating your sources.</div>
+          <button class="ai-ask" id="aibtn2" onclick="askAI('For the claim: &quot;'+S.claim+'&quot; — what kinds of evidence would be considered strong, medium, and weak? Give practical examples in plain language.','aib2','aibtn2')">Get guidance ↗</button>
+        </div>`;
+    },
+    ()=>`
+      <div class="fplain">${steps[2].plain}</div>
+      <div class="flabel">Your perspective</div>
+      <div class="fhint">Which of these best describes your angle on this topic?</div>
+      <select onchange="S.perspective=this.value">
+        <option value="" disabled ${!S.perspective?'selected':''}>Select your perspective...</option>
+        ${['Business / Market','Security / Risk','Public health','Policy / Government','Journalism / Fact-checking','Academic research','Technology / AI','Finance / Investing','Community / Civil society','Other'].map(p=>`<option value="${p}" ${S.perspective===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+      <hr class="divider">
+      <div class="flabel">How might your perspective shape your conclusion?</div>
+      <div class="fhint">What might you over-emphasize or overlook because of where you are coming from?</div>
+      <textarea placeholder="e.g. As someone in the tech industry, I may underestimate the speed of job displacement..." onchange="S.perspectiveDetail=this.value">${S.perspectiveDetail}</textarea>
+      <div class="ai-box">
+        <div class="ai-hdr"><div class="ai-dot-sm"></div>Want to explore your blind spots?</div>
+        <div class="ai-content" id="aib3">Click and the guide will name the biases most common to your perspective.</div>
+        <button class="ai-ask" id="aibtn3" onclick="askAI('I am analyzing &quot;'+S.claim+'&quot; from a &quot;'+(S.perspective||'general')+'&quot; perspective. What are the most common biases for someone with this angle, and what might I be blind to? Plain language, no jargon.','aib3','aibtn3')">Get guidance ↗</button>
+      </div>`,
+    ()=>`
+      <div class="fplain">${steps[3].plain}</div>
+      <div class="flabel">What would prove your claim wrong?</div>
+      <div class="fhint">State the specific evidence that would make you reach the opposite conclusion. This is how scientists test ideas — and how you avoid fooling yourself.</div>
+      <textarea placeholder="e.g. If three independent studies using different methods found no correlation, I would conclude the claim is false..." onchange="S.falsify=this.value" style="min-height:110px">${S.falsify}</textarea>
+      <div class="ai-box">
+        <div class="ai-hdr"><div class="ai-dot-sm"></div>Not sure what would change your mind?</div>
+        <div class="ai-content" id="aib4">Click for help designing a clear test for your claim.</div>
+        <button class="ai-ask" id="aibtn4" onclick="askAI('For the claim &quot;'+S.claim+'&quot;, help me write one clear statement about what specific evidence would prove it wrong. Plain language.','aib4','aibtn4')">Get guidance ↗</button>
+      </div>`,
+    ()=>`
+      <div class="fplain">${steps[4].plain}</div>
+      <div class="flabel">Main driver</div>
+      <div class="fhint">The single most important cause of what you are analyzing.</div>
+      <textarea placeholder="The primary cause was..." onchange="S.mainDriver=this.value" style="min-height:65px">${S.mainDriver}</textarea>
+      <hr class="divider">
+      <div class="flabel">The turning point</div>
+      <div class="fhint">When did things shift? A specific event, date, or decision.</div>
+      <textarea placeholder="The critical moment was when..." onchange="S.peakMoment=this.value" style="min-height:65px">${S.peakMoment}</textarea>
+      <hr class="divider">
+      <div class="flabel">Secondary factors</div>
+      <div class="fhint">Other things that played a role but were not the main driver.</div>
+      <textarea placeholder="Contributing factors include..." onchange="S.secondary=this.value" style="min-height:65px">${S.secondary}</textarea>
+      <div class="ai-box">
+        <div class="ai-hdr"><div class="ai-dot-sm"></div>Need help mapping the story?</div>
+        <div class="ai-content" id="aib5">Click and the guide will help you trace the causal chain.</div>
+        <button class="ai-ask" id="aibtn5" onclick="askAI('For the claim &quot;'+S.claim+'&quot;, help me identify the main driver (root cause), the turning point (when things changed), and secondary factors. Plain language.','aib5','aibtn5')">Get guidance ↗</button>
+      </div>`,
+    ()=>`
+      <div class="fplain">${steps[5].plain}</div>
+      <div class="flabel">What does your analysis not cover?</div>
+      <div class="fhint">List anything you cannot verify, data you do not have, or areas outside your expertise. This makes your analysis more trustworthy, not less.</div>
+      <textarea placeholder="I cannot verify... / I do not have access to... / This analysis does not cover..." onchange="S.limits=this.value" style="min-height:130px">${S.limits}</textarea>
+      <div class="ai-box">
+        <div class="ai-hdr"><div class="ai-dot-sm"></div>Not sure what your limits are?</div>
+        <div class="ai-content" id="aib6">Click and the guide will name common gaps for this type of analysis.</div>
+        <button class="ai-ask" id="aibtn6" onclick="askAI('I analyzed &quot;'+S.claim+'&quot; from a &quot;'+(S.perspective||'general')+'&quot; angle. What are the most important blind spots or data gaps I should explicitly acknowledge? Plain language.','aib6','aibtn6')">Get guidance ↗</button>
+      </div>`
+  ];
+
+  function render(){
+    const s=steps[S.cur-1];
+    document.getElementById('stitle').textContent=`Step ${S.cur} — ${s.label}`;
+    document.getElementById('ssub').textContent=s.sub;
+    document.getElementById('pfill').style.width=(S.cur/7*100)+'%';
+    document.getElementById('sctr').textContent=S.cur===7?'Final step':`Step ${S.cur} of 7`;
+    document.getElementById('bbtn').disabled=S.cur===1;
+    const nb=document.getElementById('nbtn');
+    if(S.cur===7){nb.textContent='Start over';nb.onclick=()=>{S.cur=1;S.apiResult=null;S.apiError=null;render()};}
+    else{nb.textContent=S.cur===6?'See results':'Next';nb.onclick=goNext;}
+    if(S.cur===7) renderStep7();
+    else document.getElementById('scontent').innerHTML=renderers[S.cur-1]();
+    renderNav();
+  }
+</script>
+</body>
+</html>
