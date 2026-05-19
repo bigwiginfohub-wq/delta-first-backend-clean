@@ -1,3 +1,6 @@
+from fastapi import HTTPException
+from pydantic import ValidationError
+import time
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ValidationError
@@ -56,8 +59,8 @@ def compute_valid(data: dict):
     # Base signals
     # -----------------------------
     base_score = data["integrity_score"] / 100.0
-    friction = data["friction_score"]
-    mcl = data["mcl_coefficient"]
+    friction = float(data.get("friction_score", 0))
+    mcl = float(data.get("mcl_coefficient", 0))
 
     driver_weight = {
         "H1": 1.0,
@@ -65,7 +68,8 @@ def compute_valid(data: dict):
         "H3": 0.8
     }.get(data["primary_driver"], 0.5)
 
-    boundary_strength = 1.0 if data["boundary"].strip() else 0.0
+    boundary = data.get("boundary") or ""
+    boundary_strength = 1.0 if boundary.strip() else 0.0
 
     # -----------------------------
     # Score components (NEW)
@@ -133,9 +137,6 @@ def compute_valid(data: dict):
 # -------------------------
 # VALIDATE ENDPOINT
 # -------------------------
-from fastapi import HTTPException
-from pydantic import ValidationError
-import time
 
 @app.post("/validate")
 def validate(payload: AuditPayload):
