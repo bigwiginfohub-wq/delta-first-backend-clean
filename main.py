@@ -133,42 +133,25 @@ def compute_valid(data: dict):
 # -------------------------
 # VALIDATE ENDPOINT
 # -------------------------
+from fastapi import HTTPException
+from pydantic import ValidationError
+import time
+
 @app.post("/validate")
 def validate(payload: AuditPayload):
-    data = payload.model_dump()
-
-    result = compute_valid(data)
-
-    return {
-        "valid": result["valid"],
-        "audit_id": data["audit_id"],
-        "primary_driver": data["primary_driver"],
-        "mcl_coefficient": data["mcl_coefficient"],
-        "friction_score": data["friction_score"],
-        "confidence": result["confidence"],
-        "explanation": result["explanation"],
-        "score_breakdown": result["score_breakdown"],
-        "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-    }
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "SERVER_ERROR",
-                "message": str(e)
-            }
-        )
-        # Validate structure
-        data = AuditPayload(**payload).model_dump()
-
-        valid = compute_valid(data)
+    try:
+        data = payload.model_dump()
+        result = compute_valid(data)
 
         return {
-            "valid": valid,
+            "valid": result["valid"],
             "audit_id": data["audit_id"],
             "primary_driver": data["primary_driver"],
             "mcl_coefficient": data["mcl_coefficient"],
             "friction_score": data["friction_score"],
+            "confidence": result["confidence"],
+            "explanation": result["explanation"],
+            "score_breakdown": result["score_breakdown"],
             "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         }
 
