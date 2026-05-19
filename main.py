@@ -121,16 +121,17 @@ def compute_valid(data: dict):
     # Return full internal object
     # -----------------------------
     return {
-        "valid": is_valid,
-        "truth_score": truth_score,
-        "confidence": confidence,
-        "explanation": explanation,
-        "score_breakdown": {
-            "integrity": round(integrity_contrib, 3),
-            "mcl": round(mcl_contrib, 3),
-            "friction": round(friction_contrib, 3),
-            "driver": round(driver_contrib, 3)
-        }
+    "valid": is_valid,
+    "truth_score": truth_score,
+    "confidence": confidence,
+    "explanation": explanation,
+    "score_breakdown": {
+        "integrity": round(integrity_contrib, 3),
+        "mcl": round(mcl_contrib, 3),
+        "friction": round(friction_contrib, 3),
+        "driver": round(driver_contrib, 3)
+    }
+}
 # -------------------------
 # VALIDATE ENDPOINT
 # -------------------------
