@@ -51,14 +51,12 @@ class AuditPayload(BaseModel):
 # -------------------------
 # CORE LOGIC
 # -------------------------
-def compute_valid(data: dict) -> bool:
+def compute_valid(data: dict):
     # -----------------------------
-    # 1. Evidence strength weighting
+    # Base signals
     # -----------------------------
     base_score = data["integrity_score"] / 100.0
-
     friction = data["friction_score"]
-
     mcl = data["mcl_coefficient"]
 
     driver_weight = {
@@ -70,40 +68,88 @@ def compute_valid(data: dict) -> bool:
     boundary_strength = 1.0 if data["boundary"].strip() else 0.0
 
     # -----------------------------
-    # 2. Enhanced truth score model
+    # Score components (NEW)
     # -----------------------------
+    integrity_contrib = base_score * 0.35
+    mcl_contrib = mcl * 0.35
+    friction_contrib = (1 - friction) * 0.20
+    driver_contrib = driver_weight * 0.10
+
     truth_score = (
-        base_score * 0.35 +
-        mcl * 0.35 +
-        (1 - friction) * 0.20 +
-        driver_weight * 0.10
+        integrity_contrib +
+        mcl_contrib +
+        friction_contrib +
+        driver_contrib
     )
 
     # -----------------------------
-    # 3. Decision threshold
+    # Decision
     # -----------------------------
-    return truth_score >= 0.62 and boundary_strength > 0
+    is_valid = truth_score >= 0.62 and boundary_strength > 0
 
+    # -----------------------------
+    # Confidence logic
+    # -----------------------------
+    if truth_score >= 0.75:
+        confidence = "high"
+    elif truth_score >= 0.55:
+        confidence = "medium"
+    else:
+        confidence = "low"
 
+    # -----------------------------
+    # Explanation generator (simple, deterministic)
+    # -----------------------------
+    explanation_parts = []
+
+    if base_score < 0.6:
+        explanation_parts.append("Low integrity score reduces confidence")
+
+    if friction > 0.6:
+        explanation_parts.append("High friction indicates conflicting signals")
+
+    if mcl < 0.6:
+        explanation_parts.append("Weak evidence aggregation (MCL is low)")
+
+    if driver_weight < 0.9:
+        explanation_parts.append("Non-primary driver reduces causal strength")
+
+    explanation = "; ".join(explanation_parts) if explanation_parts else "Signals are aligned and consistent"
+
+    # -----------------------------
+    # Return full internal object
+    # -----------------------------
+    return {
+        "valid": is_valid,
+        "truth_score": truth_score,
+        "confidence": confidence,
+        "explanation": explanation,
+        "score_breakdown": {
+            "integrity": round(integrity_contrib, 3),
+            "mcl": round(mcl_contrib, 3),
+            "friction": round(friction_contrib, 3),
+            "driver": round(driver_contrib, 3)
+        }
 # -------------------------
 # VALIDATE ENDPOINT
 # -------------------------
 @app.post("/validate")
 def validate(payload: AuditPayload):
-    try:
-        data = payload.model_dump()
+    data = payload.model_dump()
 
-        valid = compute_valid(data)
+    result = compute_valid(data)
 
-        return {
-            "valid": valid,
-            "audit_id": data["audit_id"],
-            "primary_driver": data["primary_driver"],
-            "mcl_coefficient": data["mcl_coefficient"],
-            "friction_score": data["friction_score"],
-            "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        }
-
+    return {
+        "valid": result["valid"],
+        "audit_id": data["audit_id"],
+        "primary_driver": data["primary_driver"],
+        "mcl_coefficient": data["mcl_coefficient"],
+        "friction_score": data["friction_score"],
+        "confidence": result["confidence"],
+        "explanation": result["explanation"],
+        "score_breakdown": result["score_breakdown"],
+        "validated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
     except Exception as e:
         raise HTTPException(
             status_code=500,
