@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -245,14 +246,16 @@
   <a href="https://github.com/bigwiginfohub-wq/fidelity-framework" target="_blank">Open source</a>
 </div>
 </div>
-
+window.onerror = function(msg, src, line, col, err) {
+  console.error("GLOBAL ERROR:", msg, line, col, err);
+};
 <script>
   const API_URL = "https://delta-first-backend-clean.vercel.app";
   
   function startDashboard() {
     document.getElementById('landing').style.display = 'none';
     document.getElementById('dashboard').classList.add('visible');
-    checkAPI();
+    // checkAPI();
     render();
   }
 
@@ -442,8 +445,14 @@
       </div>`;
   }
 
-  const renderers=[
-    ()=>`
+  const renderers = [
+  () => `<h1>Step 1</h1>`,
+  () => `<h1>Step 2</h1>`,
+  () => `<h1>Step 3</h1>`,
+  () => `<h1>Step 4</h1>`,
+  () => `<h1>Step 5</h1>`,
+  () => `<h1>Step 6</h1>`
+];`
       <div class="fplain">${steps[0].plain}</div>
       <div class="flabel">The claim you are testing</div>
       <div class="fhint">Example: "This policy reduced crime rates" or "The data shows AI is replacing jobs faster than new ones are created."</div>
@@ -550,6 +559,9 @@
     else document.getElementById('scontent').innerHTML=renderers[S.cur-1]();
     renderNav();
   }
+console.log("SCRIPT LOADED");
+window.startDashboard = startDashboard;
 </script>
 </body>
 </html>
+
