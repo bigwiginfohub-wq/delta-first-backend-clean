@@ -331,11 +331,13 @@
     const friction=parseFloat(Math.min(1,Math.max(0,0.5+(weak*0.1-strong*0.05))).toFixed(2));
     const payload={auditor_id:'vintas-public',audit_id:'audit_'+Date.now(),integrity_score:84.0,protocol_mode:'Full Protocol Mode',primary_driver:S.falsify?'H3':'H1',reasoning_trace:S.claim||'No claim provided.',peak_moment:S.peakMoment||'Not specified.',interpretive_anchor:S.perspectiveDetail||S.perspective||'General.',h3_warrant:S.falsify||'Not specified.',null_test:'No.',label_impact:'Harder',friction_score_components:{base:0.50,lens_divergence:0.14,warrant_ambiguity:0.08,validation_confidence:0.05},friction_score:friction,mcl_coefficient:mcl,boundary:S.limits||'No boundary stated.'};
     try {
-      const res=await fetch(API_URL + "/validate",{{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      S.apiResult=await res.json();
-    } catch(e){ S.apiError='Could not reach the validation server. Please check your connection and try again.'; }
-    S.submitting=false; renderStep7();
-  }
+      const res = await fetch(API_URL + "/validate", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+});
 
   function plainScore(score){
     if(score>=0.75) return 'Strong evidence base';
