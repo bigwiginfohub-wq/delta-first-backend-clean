@@ -10,10 +10,13 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://vintas.org",
-        "https://www.vintas.org",
-        "http://localhost:*"
-    ],
+    "https://vitnas.org",
+    "https://www.vitnas.org",
+    "https://vintas.org",
+    "https://www.vintas.org",
+    "http://localhost:3000",
+    "http://localhost:8000",
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
